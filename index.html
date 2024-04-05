@@ -14,6 +14,22 @@
             height: 25px;
             font-size: 16px;
         }
+        #suggestions {
+            cursor: pointer;
+            text-align: left;
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            margin: 0 auto;
+            width: 300px;
+        }
+        .suggestion-item {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
         #weatherDisplay {
             margin-top: 20px;
             font-size: 24px;
@@ -21,15 +37,69 @@
     </style>
 </head>
 <body>
-    <input type="text" id="searchBar" placeholder="Enter City Name">
+    <input type="text" id="searchBar" placeholder="Enter City Name" autocomplete="off">
+    <div id="suggestions"></div>
     <div id="weatherDisplay">
         <!-- Weather information will be displayed here -->
     </div>
     <script>
-        document.getElementById('searchBar').addEventListener('keypress', function(event) {
+        const cities = [
+            {name: "Copenhagen", lat: 55.6761, lon: 12.5683},
+            {name: "Aarhus", lat: 56.1629, lon: 10.2039},
+            {name: "Odense", lat: 55.4038, lon: 10.4024},
+            {name: "Aalborg", lat: 57.0488, lon: 9.9217},
+            {name: "Esbjerg", lat: 55.4767, lon: 8.4594},
+            {name: "Randers", lat: 56.4607, lon: 10.0368},
+            {name: "Kolding", lat: 55.4904, lon: 9.4722},
+            {name: "Horsens", lat: 55.8607, lon: 9.8503},
+            {name: "Vejle", lat: 55.7093, lon: 9.5357},
+            {name: "Roskilde", lat: 55.6425, lon: 12.0803},
+            {name: "Frederiksberg", lat: 55.6763, lon: 12.5338},
+            {name: "Helsingør", lat: 56.0361, lon: 12.6136},
+            {name: "Herning", lat: 56.1396, lon: 8.9734},
+            {name: "Hørsholm", lat: 55.8833, lon: 12.4949},
+            {name: "Køge", lat: 55.4580, lon: 12.1821},
+            {name: "Silkeborg", lat: 56.1697, lon: 9.5549},
+            {name: "Slagelse", lat: 55.4028, lon: 11.3546},
+            {name: "Holstebro", lat: 56.3601, lon: 8.6131}
+            // Add more cities as needed
+        ];
+
+        const searchBar = document.getElementById('searchBar');
+        const suggestionsPanel = document.getElementById('suggestions');
+
+        searchBar.addEventListener('input', () => {
+            const input = searchBar.value;
+            suggestionsPanel.innerHTML = '';
+            const suggestions = cities.filter(city => city.name.toLowerCase().startsWith(input.toLowerCase()));
+            suggestions.forEach(suggested => {
+                const div = document.createElement('div');
+                div.innerHTML = suggested.name;
+                div.classList.add('suggestion-item');
+                div.onclick = function () {
+                    searchBar.value = suggested.name;
+                    displayWeather(suggested);
+                    suggestionsPanel.innerHTML = '';
+                };
+                suggestionsPanel.appendChild(div);
+            });
+            if (input === '') {
+                suggestionsPanel.innerHTML = '';
+            }
+        });
+
+        function displayWeather(city) {
+            document.getElementById('weatherDisplay').innerText = `Weather for ${city.name}: 25°C, Sunny\nLatitude: ${city.lat}, Longitude: ${city.lon}`;
+        }
+
+        searchBar.addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
-                let city = document.getElementById('searchBar').value;
-                document.getElementById('weatherDisplay').innerText = 'Weather for ' + city + ': 25°C, Sunny';
+                const city = cities.find(c => c.name.toLowerCase() === searchBar.value.toLowerCase());
+                if (city) {
+                    displayWeather(city);
+                } else {
+                    document.getElementById('weatherDisplay').innerText = 'Lokation ikke fundet!';
+                }
             }
         });
     </script>
